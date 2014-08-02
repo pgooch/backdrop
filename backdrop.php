@@ -3,14 +3,14 @@
 Plugin Name: Backdrop
 Plugin URI: http://www.fatfolderdesign.com/wp-plugins/backdrop/
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 1.1.2
+Version: 1.3.4
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
 */
 
 class backdrop {
-	public $version = '1.1.2'; // Update this string every version
+	public $version = '1.3.4'; // Update this string every version
 	public $option_name = 'Backdrop Settings';
 	public $generated_location = '';
 
@@ -171,3 +171,12 @@ class backdrop {
 // The final peice(s) of the puzzle.
 $backdrop=new backdrop();
 register_activation_hook(__FILE__,array('backdrop','__activate'));
+
+
+
+add_filter("attribute_escape", "myfunction", 10, 2);
+function myfunction($safe_text, $text) {
+    return str_replace(__('Insert into Post'), __('Use this image'), $text);
+}
+
+//Use as featured image

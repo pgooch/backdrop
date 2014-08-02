@@ -107,7 +107,7 @@ textarea{
 					<input type="radio" <?= @($settings['backdrop']['image']['attachment']=='fullscreen'?'checked="checked"':'') ?> name="backdrop[image][attachment]" value="fullscreen" id="background_image_attachment_fullscreen" /> <span class="description"><label for="background_image_attachment_fullscreen">Fullscreen</label></span> &nbsp; &nbsp; &nbsp;
 				</td>
 			</tr>
-			<tr valign="top" class="fixed scroll parallax slide">
+			<tr valign="top" class="scroll parallax fixed slide">
 				<th scope="row">Image Repeat</th>
 				<td>
 					<input type="radio" <?= @($settings['backdrop']['image']['repeat']=='xy'?'checked="checked"':'') ?> name="backdrop[image][repeat]" value="xy" id="background_image_repeat_xy" /> <span class="description"><label for="background_image_repeat_xy">Repeat X + Y</label></span> &nbsp; &nbsp; &nbsp;
@@ -122,6 +122,7 @@ textarea{
 					<input type="radio" <?= @($settings['backdrop']['image']['hpos']=='left'?'checked="checked"':'') ?> name="backdrop[image][hpos]" value="left" id="background_image_hpos_left" /> <span class="description"><label for="background_image_hpos_left">Left</label></span> &nbsp; &nbsp; &nbsp;
 					<input type="radio" <?= @($settings['backdrop']['image']['hpos']=='center'?'checked="checked"':'') ?> name="backdrop[image][hpos]" value="center" id="background_image_hpos_center" /> <span class="description"><label for="background_image_hpos_center">Center</label></span> &nbsp; &nbsp; &nbsp;
 					<input type="radio" <?= @($settings['backdrop']['image']['hpos']=='right'?'checked="checked"':'') ?> name="backdrop[image][hpos]" value="right" id="background_image_hpos_right" /> <span class="description"><label for="background_image_hpos_right">Right</label></span> &nbsp; &nbsp; &nbsp;
+					<input type="radio" <?= @($settings['backdrop']['image']['hpos']=='stretch'?'checked="checked"':'') ?> name="backdrop[image][hpos]" value="stretch" id="background_image_hpos_stretch" /> <span class="description"><label for="background_image_hpos_stretch">Stretch</label></span> &nbsp; &nbsp; &nbsp;
 				</td>
 			</tr>
 			<tr valign="top" class="scroll fixed">
@@ -132,7 +133,7 @@ textarea{
 					<input type="radio" <?= @($settings['backdrop']['image']['vpos']=='bottom'?'checked="checked"':'') ?> name="backdrop[image][vpos]" value="bottom" id="background_image_vpos_bottom" /> <span class="description"><label for="background_image_vpos_bottom">Bottom</label></span> &nbsp; &nbsp; &nbsp;
 				</td>
 			</tr>
-			<tr valign="top" class="fixed scroll parallax slide">
+			<tr valign="top" class="scroll parallax fixed slide" id="retinize">
 				<th scope="row">Retinize Background</th>
 				<td>
 					<input type="hidden" name="backdrop[image][retinize]" value="no" />
@@ -150,19 +151,12 @@ textarea{
 				<th scope="row">Image Slide Direction</th>
 				<td>
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='up'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="up" id="background_image_slide_up" /> <span class="description"><label for="background_image_slide_up">Up</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='up-right'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="up-right" id="background_image_slide_up-right" /> <span class="description"><label for="background_image_slide_up-right">Up-Right</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='right'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="right" id="background_image_slide_right" /> <span class="description"><label for="background_image_slide_right">Right</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='down-right'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="down-right" id="background_image_slide_down-right" /> <span class="description"><label for="background_image_slide_down-right">Down-Right</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='down'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="down" id="background_image_slide_down" /> <span class="description"><label for="background_image_slide_down">Down</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='down-left'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="down-left" id="background_image_slide_down-left" /> <span class="description"><label for="background_image_slide_down-left">Down-Left</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='left'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="left" id="background_image_slide_left" /> <span class="description"><label for="background_image_slide_left">Left</label></span> &nbsp; &nbsp; &nbsp;
-
 					<input type="radio" <?= @($settings['backdrop']['image']['slide']=='up-left'?'checked="checked"':'') ?> name="backdrop[image][slide]" value="up-left" id="background_image_slide_up-left" /> <span class="description"><label for="background_image_slide_up-left">Up-Left</label></span> &nbsp; &nbsp; &nbsp;
 				</td>
 			</tr>
@@ -314,6 +308,9 @@ textarea{
 	$('input[name="background_type"]').click(function(){
 		$('table.backdrop_options').hide();
 		$('table#'+$(this).val()).show();
+		$('table.backdrop_options input, table.backdrop_options textarea').attr('disabled',true);
+		$('table#'+$(this).val()+'.backdrop_options input, table#'+$(this).val()+'.backdrop_options textarea').attr('disabled',false);
+		$(document).ready(function(){$('#background_image_hpos_stretch').trigger('click',true);});
 	});
 	// Handels switching based on any sub type (remvoed all table rows that don't have the class "all" or input value)
 	$(document).ready(function(){$('tr.adaptor input:checked').click();});
@@ -321,6 +318,20 @@ textarea{
 		var selector = $(this).val();
 		$(this).parent().parent().parent().parent().find('tr').show();
 		$(this).parent().parent().parent().parent().find('tr:not(.all, .adaptor, .'+selector+')').hide();
+		$(document).ready(function(){$('#background_image_hpos_stretch').trigger('click',true);});
+	});
+	// A special little one, if you have Horizontal Position set to Stretch then you have effectively disabled the Retinizer
+	$(document).ready(function(){$('#background_image_hpos_stretch').trigger('click',true);});
+	$('tr [name="backdrop[image][hpos]"]').click(function(e,ignore){
+		$('#retinize').show();
+		if($('input[name="backdrop[image][attachment]"]').val()=='scroll' || $('input[name="backdrop[image][attachment]"]').val()=='parallax' || $('input[name="backdrop[image][attachment]"]').val()=='fixed'){
+			if($('#background_image_hpos_stretch').is(':checked')){
+				$('#retinize').hide();
+			}
+		}
+		if(ignore){
+			e.preventDefault();
+		}
 	});
 	// Handels image uploading
 	$(document).ready(function(){

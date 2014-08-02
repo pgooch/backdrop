@@ -36,44 +36,48 @@
 		}
 		if($a['attachment']=='parallax'){
 			// We need a tad bit of scripting to make parallax... prallax...
-			$this->js ='window.onload=function(){'."\n";
-			$this->js.='	window.onscroll=function(){'."\n";
-			$this->js.='		var sY = (document.documentElement.scrollTop)?document.documentElement.scrollTop:window.pageYOffset;'."\n";
-			$this->js.='		var pB = document.getElementsByTagName("body")[0];'."\n";
-			$this->js.='		document.getElementsByTagName("body")[0].style.backgroundPosition="'.$a['hpos'].' "+Math.round((sY*'.($a['parallax_adjustment']/100).')*-1)+"px"'."\n";
-			$this->js.='	}'."\n";
-			$this->js.='}'."\n";
+			$this->js  = 'window.onscroll=backdropParallax;'."\n";
+			$this->js .= 'function backdropParallax(){
+				var sY = (document.documentElement.scrollTop)?document.documentElement.scrollTop:window.pageYOffset;
+				var pB = document.getElementsByTagName("body")[0];
+				document.getElementsByTagName("body")[0].style.backgroundPosition="'.($a['hpos']=='stretch'?'center':$a['hpos']).' "+Math.round((sY*'.($a['parallax_adjustment']/100).')*-1)+"px"
+			}'."\n";
+			$this->js .= 'backdropParallax();'."\n";
+			// And just in case it didn't work we have a backup
+			$this->js .= 'window.onload=backdropParallax;'."\n";
 		}
 		if($a['attachment']=='slide'){
 			// At it's core it's just a modified version of parallax that can work in both directions, of couse the increases the complextiy a bit.
-			$a['hpos'] = '0px';
-			$a['vpos'] = '0px';
-			$this->js ='window.onload=function(){'."\n";
-			$this->js.='	window.onscroll=function(){'."\n";
-			$this->js.='		var vS = "0";'."\n";
-			$this->js.='		var hS = "0";'."\n";
-			$this->js.='		var sY = (document.documentElement.scrollTop)?document.documentElement.scrollTop:window.pageYOffset;'."\n";
-			$this->js.='		var pB = document.getElementsByTagName("body")[0];'."\n";
-			if(strripos($a['slide'],'left')!==false){
-				$this->js.='		hS = ((sY*'.($a['slide_speed']/100).')*-1);'."\n";
-			}
-			if(strripos($a['slide'],'right')!==false){
-				$this->js.='		hS = ((sY*'.($a['slide_speed']/100).'));'."\n";
-			}
-			if(strripos($a['slide'],'up')!==false){
-				$this->js.='		vS = ((sY*'.($a['slide_speed']/100).')*-1);'."\n";
-			}
-			if(strripos($a['slide'],'down')!==false){
-				$this->js.='		vS = ((sY*'.($a['slide_speed']/100).'));'."\n";
-			}
-			$this->js.='		pB.style.backgroundPosition=Math.round(hS)+"px "+Math.round(vS)+"px";'."\n";
-			$this->js.='	}'."\n";
-			$this->js.='}'."\n";
+			$this->js  = 'window.onscroll=backdropSlide;'."\n";
+			$this->js .= 'function backdropSlide(){
+				var vS = 0;
+				var hS = 0;
+				var sY = (document.documentElement.scrollTop)?document.documentElement.scrollTop:window.pageYOffset;
+				var pB = document.getElementsByTagName("body")[0];'."\n";
+				if(strripos($a['slide'],'left')!==false){
+					$this->js.='		hS = ((sY*'.($a['slide_speed']/100).')*-1);'."\n";
+				}
+				if(strripos($a['slide'],'right')!==false){
+					$this->js.='		hS = ((sY*'.($a['slide_speed']/100).'));'."\n";
+				}
+				if(strripos($a['slide'],'up')!==false){
+					$this->js.='		vS = ((sY*'.($a['slide_speed']/100).')*-1);'."\n";
+				}
+				if(strripos($a['slide'],'down')!==false){
+					$this->js.='		vS = ((sY*'.($a['slide_speed']/100).'));'."\n";
+				}
+			$this->js .= '
+				pB.style.backgroundPosition=Math.round(hS)+"px "+Math.round(vS)+"px";
+			}'."\n";
+			$this->js .= 'backdropSlide();'."\n";
+			// And just in case it didn't work we have a backup
+			$this->js .= 'window.onload=backdropSlide;'."\n";
+
 		}
-		if($a['attachment']=='parallax' || $a['attachment']=='slide'){
-			// Now that all the scripting is handled lets change to to fixed so the css is simpler
-			$a['attachment'] = 'fixed';
-		}
+//		if($a['attachment']=='parallax' || $a['attachment']=='slide'){
+//			// Now that all the scripting is handled lets change to to fixed so the css is simpler
+//			$a['attachment'] = 'fixed';
+//		}
 		switch($a['attachment']){
 			case 'fullscreen':
 				$this->css.='#backdrop_funky_foot{'."\n";
@@ -100,12 +104,32 @@
 				$this->css.='html body,'."\n";
 				$this->css.='html body.custom-background,'."\n";
 				$this->css.='html body.customize-support{'."\n";
-				$this->css.='	background: '.$a['color'].' url("'.$a['img'].'") '.$repeat.' '.$a['attachment'].' '.$a['hpos'].' '.$a['vpos'].';'."\n";
+				$this->css.='	background-color: '.$a['color'].';';
+				$this->css.='	background-image: url("'.$a['img'].'");';
+				$this->css.='	background-repeat:'.$repeat.';';
+				
+				if($a['attachment']=='parallax' || $a['attachment']=='slide'){
+					$this->css.='	background-attachment:fixed;';
+				}else{
+					$this->css.='	background-attachment:'.$a['attachment'].';';
+				}
+				// Slide does not have a horizontal attachment, because it has to get changed on the fly
+				if($a['attachment']=='slide'){
+					$a['hpos'] = 0;
+					$a['vpos'] = 0;
+				}
+				if($a['hpos']=='stretch' && ($a['attachment']=='parallax' || $a['attachment']=='fixed' || $a['attachment']=='scroll') ){
+					$this->css.='	background-size: 100% auto;'."\n";
+					$this->css.='	background-position: center '.$a['vpos'].';'."\n";
+					// And because this overrides retina...
+					$a['retinize'] = 'no';
+				}else{
+					$this->css.='	background-position: '.$a['hpos'].' '.$a['vpos'].';'."\n";
+				}
 				if($a['retinize']=='yes'){
 					$is=getimagesize($a['img']);
 					$this->css.='	background-size: '.($is[0]/2).'px '.($is[1]/2).'px;'."\n";
 				}
-				$this->css.='}'."\n";
 			break;
 		}
 	}
