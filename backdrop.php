@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://www.fatfolderdesign.com/wp-plugins/backdrop/
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 1.3.4
+Version: 1.3.5
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
