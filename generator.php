@@ -10,6 +10,7 @@ require('../../../wp-blog-header.php');
 if(isset($_GET['use_session'])){
 	session_start();
 	$session = (isset($_SESSION['currently_customized_backdrop_options'])?$_SESSION['currently_customized_backdrop_options']:array());
+	$session['session_id'] = session_id();
 }else{
 	$session = array();
 }
@@ -22,7 +23,7 @@ $_in_advanced = (get_option('backdrop-advanced','disabled')=='enabled'?true:fals
 
 // If they you have advanced mode on chagne the ones that overrite non advanced over
 if($_in_advanced){
-	foreach(array('image-position-adv','image-size-adv') as $key){
+	foreach(array('image-position-adv','image-size-adv','element-include-adv') as $key){
 		if(isset($session[$key])){
 			$session[substr($key,0,-4)]=$session[$key];
 		}
@@ -35,22 +36,24 @@ if($_in_advanced){
 // Merge all the toption arrays together
 $options = array_merge(
 	array(
-		'color' 			=> '#fafafa',
-		'color-opacity' 	=> 100,
-		'image' 			=> '',
-	    'image-size' 		=> 'auto',
-	    'image-repeat'		=> 'repeat',
-	    'image-position'    => 'center center',
-	    'background-effect'	=> 'fixed',
-	    'parallax-speed'	=> '33',
-	    'move-speed'		=> 100,
-	    'move-direction'	=> 'right none',
+		'color' 				=> '#fafafa',
+		'color-opacity' 		=> 100,
+		'image' 				=> '',
+	    'image-size' 			=> 'auto',
+	    'image-repeat'			=> 'repeat',
+	    'image-position'    	=> 'center center',
+	    'background-effect'		=> 'fixed',
+	    'parallax-speed'		=> '33',
+	    'move-speed'			=> 100,
+	    'move-direction'		=> 'right none',
+	    'element-include'		=> true,
 	    // These are used by the advanced mode options
-	    'element'			=> '#backdrop-element',
-	    'image-position-adv'=> 'center center', // overridden above, just here to be complete.
-	    'additional-styles' => '',
+	    'element'				=> '#backdrop-element',
+	    'element-include-adv'	=> true,
+	    'image-position-adv'	=> 'center center', // overridden above, just here to be complete.
+	    'additional-styles' 	=> '',
 	    // Not updated by user
-		'last_update' 		=> -1,
+		'last_update' 			=> -1,
 	),
 	$options,
 	$session
@@ -70,7 +73,7 @@ header("Last-Modified: ".gmdate("D, d M Y H:i:s",$time)." GMT");
 header('Cache-Control: public');
 
 // And if were getting a last modofied and it hasent been modofied...
-if(@strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])==$time) { 
+if(@strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])==$time && !isset($_GET['use_session'])) { 
 	header("HTTP/1.1 304 Not Modified"); 
 	exit; 
 }
@@ -102,7 +105,11 @@ if($options['color-opacity']!=0 && $options['color-opacity']!=100){
 
 // Get the image size (used in CSS and JS)
 $upload_dir = wp_upload_dir();
-$image_size = getimagesize($upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$options['image']));
+if(is_file($upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$options['image']))){
+	$image_size = getimagesize($upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$options['image']));
+}else{
+	$image_size = array(0,0); // Fake image size so it will still find the array values it wants
+}
 
 // Check if the image-size is retina, adjust as needed.
 if($options['image-size']=='retina' && $options['image']!='' && $options['image']!='none'){

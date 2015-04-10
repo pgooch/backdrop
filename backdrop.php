@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.0
+Version: 2.1.1
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
@@ -28,7 +28,7 @@ class backdrop {
 		// Everything for Backdrop will go into 1 section for convience.
 		$wp_customize->add_section('backdrop',array(
 			 'title'        => __( 'Backdrop','backdrop-plugin' ),
-			 'description'	=> 'For more details on the options below read the <a href="themes.php?page=backdrop-help" target="_blank">Backdrop Help</a> Page.<br/><i>Note: Animations appear more sluggish in the preview than on the live site.</i>',
+			 'description'	=> 'For more details on the options below read the <a href="themes.php?page=backdrop-help" target="_blank">Backdrop Help</a> Page. <i>Note: Animations appear more sluggish in the preview than on the live site. Complex themes may be slow to refresh background.</i>'.(get_option('backdrop-advanced','disabled')=='enabled'?'<br/><br/>View the <a href="'.plugins_url().'/backdrop/generator.php?generate=css&time='.time().'" target="_blank">Generated CSS</a> or <a href="'.plugins_url().'/backdrop/generator.php?generate=js&time='.time().'" target="_blank">Generated JS</a> files, these do not unsaved changes currently being previewed, fi you would like to view those temporary stylesheets add <code>&use_session=true</code> to the URL.<br/><br/>':''),
 			 'priority'     => 1,
 		) );
 
@@ -45,6 +45,22 @@ class backdrop {
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[element]',
 				'type'       => 'text',
+			));
+		}
+
+		// ADV: To show the backdrop element or to not show, that is the question
+		if(get_option('backdrop-advanced','disabled')=='enabled'){
+			$wp_customize->add_setting('backdrop[element-include-adv]', array(
+				'default'        	=> true,
+				'capability'     	=> 'edit_theme_options',
+				'type'           	=> 'option',
+				'sanitize_callback' => 'sanitize_fake',
+			));
+			$wp_customize->add_control('background_element_include', array(
+				'label'      => __('Include the #backdrop-element','backdrop-plugin'),
+				'section'    => 'backdrop',
+				'settings'   => 'backdrop[element-include-adv]',
+				'type'       => 'checkbox',
 			));
 		}
 
@@ -282,22 +298,28 @@ class backdrop {
 		// The URL modifier for if we should use the session stored data
 		$use_session = '';
 
-		// If we are in the customize preview we need to tell the generator to use what we put in the session, otherwise we can pass on that
-		if(is_customize_preview()){
-
-			// Before we create a session lets make sure ones not already going on
-			if(session_status()!=PHP_SESSION_ACTIVE){
-				session_start();
-			}
-
-			// Update the session and the $use_options string
-			$_SESSION['currently_customized_backdrop_options'] = get_option('backdrop');
-			$use_session = '&use_session=true';
-
-		}
-
 		// Get the options (specifically for the last update time)
 		$options = get_option('backdrop',array('last_update'=>-1));
+
+		// Just in case someone has sessions disabled on a server level (it might solve a problem or two).
+		if(is_callable('session_start')){
+
+			// If we are in the customize preview we need to tell the generator to use what we put in the session, otherwise we can pass on that
+			if(is_customize_preview()){
+
+				// Before we create a session lets make sure ones not already going on
+				if(session_status()!=PHP_SESSION_ACTIVE){
+					session_start();
+				}
+
+				// Update the session and the $use_options string
+				$_SESSION['currently_customized_backdrop_options'] = get_option('backdrop');
+				$use_session = '&use_session=true';
+				$options['last_update'] = preg_replace('~[^0-9]+~','',microtime());
+
+			}
+
+		}
 
 		// Enque the script and style
 		wp_enqueue_script('Backdrop Scripts',plugins_url().'/backdrop/generator.php?generate=js&time='.$options['last_update'].$use_session,array(),false,'all');
@@ -311,7 +333,20 @@ class backdrop {
 		the interesteing ones in 1.X).
 	*/
 	public function element(){
+
+		// Get the options (specifically for the last update time)
+		$options = get_option('backdrop',array('element-include'=>true,'element-include-adv'=>true));
+
+		// If were in advanced mode change the adv to the normal
+		if(get_option('backdrop-advanced','disabled')=='enabled'){
+			$options['element-include'] = $options['element-include-adv'];
+		}
+
+		// If were are going to show it show it.
+		if($options['element-include']){
 			echo '<div id="backdrop-element"></div>';
+		}
+	
 	}
 
 	/*

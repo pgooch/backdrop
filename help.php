@@ -264,6 +264,13 @@ if(isset($_POST['clear_settings'])){
 		} ?>
 	</p>
 </form>
+<p>
+	At the top of the Backdrop panel there is a new message about how to view the generated style sheets. These links 
+	generate the stylesheets and currently being used on your live site, not the ones being used to generate the preview 
+	to the right of the customizer. This can be changed by adding <code>&use_session=true</code> to the URL. If you are 
+	having in problems with Backdrop please include both your Generated CSS and Generated JS files when contating me so 
+	I can better diagnose the problem.
+</p>
 <?php if(get_option('backdrop-advanced','disabled')!='disabled'){?>
 	<table class="form-table">
 		<tbody>
@@ -286,6 +293,18 @@ if(isset($_POST['clear_settings'])){
 				</td>
 			</tr>
 		
+			<tr valign="top">
+				<th scope="row">Include the #backdrop-element</th>
+				<td>
+					<p>
+						IF you are not using the default backdrop element (a div with the id "backdrop-element") you can 
+						opt to not have it inlcuded on your page. This element is a single empty div placed at the bottom 
+						of the page and has no discernable impact on page loading, so leaving it on at all time should 
+						not pose a problem. If you disable advnaced mode it will automatically be re-enabled.
+					</p>
+				</td>
+			</tr>
+
 			<tr valign="top">
 				<th scope="row">Image Position</th>
 				<td>
