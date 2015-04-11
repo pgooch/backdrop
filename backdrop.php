@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.1.1
+Version: 2.1.2
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
@@ -308,7 +308,7 @@ class backdrop {
 			if(is_customize_preview()){
 
 				// Before we create a session lets make sure ones not already going on
-				if(session_status()!=PHP_SESSION_ACTIVE){
+				if(!isset($_SESSION)){
 					session_start();
 				}
 
@@ -343,7 +343,7 @@ class backdrop {
 		}
 
 		// If were are going to show it show it.
-		if($options['element-include']){
+		if(isset($options['element-include'])===false || $options['element-include']===true){
 			echo '<div id="backdrop-element"></div>';
 		}
 	

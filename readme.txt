@@ -3,7 +3,7 @@ Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
 Tested up to: 4.1.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,10 @@ Probably, let me know and I'll see if I can work it in there.
 
 == Changelog ==
 
+#### 2.1.2
+ + Changes some of the session logic to support versions of PHP pre 5.4.
+ + Fixed an order error regarding headers in the generator file.
+ + Added a second check for adding the #backdrop-element to prevent odd cases where it would not load even though it should.
 #### 2.1.1
  + Fixed a bug that would cause the live preview not to update until you saved.
  + Added an option to not include the default backdrop element when in advanced mode.

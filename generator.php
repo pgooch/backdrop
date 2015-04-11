@@ -59,14 +59,6 @@ $options = array_merge(
 	$session
 );
 
-// Output the settings into a comment (if in advanced, no real need in normal mode)
-if($_in_advanced){
-	echo '/*';
-	echo "\n".'Backdrop Settings ';
-	print_r($options);
-	echo '*/'."\n";
-}
-
 // And finally lets send some headers out
 $time = round($options['last_update']/1000);//Because timestamps in JS are not in seconds
 header("Last-Modified: ".gmdate("D, d M Y H:i:s",$time)." GMT");
@@ -357,4 +349,12 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 */
 }else{
 	header("HTTP/1.0 404 Not Found");
+}
+
+// Output the settings into a comment (if in advanced, no real need in normal mode)
+if($_in_advanced){
+	echo '/*';
+	echo "\n".'Backdrop Settings ';
+	print_r($options);
+	echo '*/'."\n";
 }
