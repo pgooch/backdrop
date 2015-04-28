@@ -309,7 +309,7 @@ class backdrop {
 
 				// Before we create a session lets make sure ones not already going on
 				if(!isset($_SESSION)){
-					session_start();
+					@session_start();
 				}
 
 				// Update the session and the $use_options string
