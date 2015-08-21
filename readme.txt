@@ -2,8 +2,8 @@
 Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
-Tested up to: 4.1.1
-Stable tag: 2.1.2
+Tested up to: 4.3
+Stable tag: 2.1.3
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,9 @@ Probably, let me know and I'll see if I can work it in there.
 
 == Changelog ==
 
+#### 2.1.3
+ + Confirmed WP 4.3 compatibility
+ + Made a change to the generator that should improve reliability.
 #### 2.1.2
  + Changes some of the session logic to support versions of PHP pre 5.4.
  + Fixed an order error regarding headers in the generator file.

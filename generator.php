@@ -4,7 +4,7 @@
 	load the options and merge that with the defaults (better to be safe, I know the default should be passed but I've 
 	noticed that it doesn't always do it with my themes).
 */
-require('../../../wp-blog-header.php');
+require('../../../wp-config.php');
 
 // Get and merge the options with the defaults and any currently customized ones that might be in the session
 if(isset($_GET['use_session'])){
