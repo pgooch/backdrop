@@ -97,8 +97,10 @@ if($options['color-opacity']!=0 && $options['color-opacity']!=100){
 
 // Get the image size (used in CSS and JS)
 $upload_dir = wp_upload_dir();
-if(is_file($upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$options['image']))){
-	$image_size = getimagesize($upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$options['image']));
+$check_file = explode('/',$options['image']);
+$check_file = $upload_dir['path'].'/'.$check_file[count($check_file)-1];
+if(is_file($check_file)){
+	$image_size = getimagesize($check_file);
 }else{
 	$image_size = array(0,0); // Fake image size so it will still find the array values it wants
 }

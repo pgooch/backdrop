@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.1.3
+Version: 2.1.4
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
@@ -19,6 +19,11 @@ class backdrop {
 		// Add the help page
 		add_action('admin_menu',		array(&$this,'help'			));
 	}
+
+	/*
+		We don't actually do anything on activate, but we don't want there to be an error output about it
+	*/
+	static function __activate(){}
 
 	/*
 		This will populate the customizer with the new section and options.
@@ -393,7 +398,8 @@ if(!function_exists('sanitize_file')){
 	function sanitize_file($file){
 		// Repath it so we know where to check
 		$upload_dir = wp_upload_dir();
-		$check_file = $upload_dir['basedir'].str_ireplace(get_site_url().'/wp-content/uploads','',$file);
+		$check_file = explode('/',$file);
+		$check_file = $upload_dir['path'].'/'.$check_file[count($check_file)-1];
 		// Check, return as needed
 		if(is_file($check_file)){
 			return $file;
