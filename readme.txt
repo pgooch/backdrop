@@ -2,7 +2,7 @@
 Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
-Tested up to: 4.3.1
+Tested up to: 4.6
 Stable tag: 2.1.4
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
