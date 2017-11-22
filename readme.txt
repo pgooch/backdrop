@@ -2,8 +2,8 @@
 Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
-Tested up to: 4.6
-Stable tag: 2.1.4
+Tested up to: 4.9
+Stable tag: 2.1.5
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,8 @@ Probably, let me know and I'll see if I can work it in there.
 
 == Changelog ==
 
+#### 2.1.5
+ + Fixed a caching issue that could prevent the CSS and JS files from generating
 #### 2.1.4
  + Fixed a big that would cause images not to work on multi-site networks.
  + Fixed the exepected output notice when activating the plugin.

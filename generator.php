@@ -64,13 +64,6 @@ $time = round($options['last_update']/1000);//Because timestamps in JS are not i
 header("Last-Modified: ".gmdate("D, d M Y H:i:s",$time)." GMT");
 header('Cache-Control: public');
 
-// And if were getting a last modofied and it hasent been modofied...
-if(@strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE'])==$time && !isset($_GET['use_session'])) { 
-	header("HTTP/1.1 304 Not Modified"); 
-	exit; 
-}
-
-
 /*
 	We are going to pre-process some of the values into things that work a little better for the CSS and JS parts.
 */

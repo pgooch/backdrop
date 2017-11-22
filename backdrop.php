@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.1.4
+Version: 2.1.5
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
@@ -285,10 +285,10 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_last_update_control($wp_customize,'last_update',array(
-			'label'     => __('Last Update','lawless'),
+			'label'     => __('Last Update','backdrop-plugin'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[last_update]',
-			'type' 		=> 'last_update'
+			'type' 		=> 'last_update',
 		)));
 	}
 
@@ -327,8 +327,8 @@ class backdrop {
 		}
 
 		// Enque the script and style
-		wp_enqueue_script('Backdrop Scripts',plugins_url().'/backdrop/generator.php?generate=js&time='.$options['last_update'].$use_session,array(),false,'all');
-		wp_enqueue_style('Backdrop Styles',plugins_url().'/backdrop/generator.php?generate=css&time='.$options['last_update'].$use_session,array(),false,'all');
+		wp_enqueue_script('Backdrop Scripts',plugins_url().'/backdrop/generator.php?generate=js&time='.time().$use_session,array(),false,'all');
+		wp_enqueue_style('Backdrop Styles',plugins_url().'/backdrop/generator.php?generate=css&time='.time().$use_session,array(),false,'all');
 
 	}
 
