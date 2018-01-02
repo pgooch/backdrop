@@ -47,11 +47,13 @@ $options = array_merge(
 	    'move-speed'			=> 100,
 	    'move-direction'		=> 'right none',
 	    'element-include'		=> true,
+	    'display-on'			=> 'all',
 	    // These are used by the advanced mode options
 	    'element'				=> '#backdrop-element',
 	    'element-include-adv'	=> true,
 	    'image-position-adv'	=> 'center center', // overridden above, just here to be complete.
 	    'additional-styles' 	=> '',
+	    'css-wrapper'			=> '',
 	    // Not updated by user
 		'last_update' 			=> -1,
 	),
@@ -73,6 +75,15 @@ if($_in_advanced){
 	$el = $options['element'];
 }else{
 	$el = '#backdrop-element';
+}
+
+// Chek the display on settings to see if we need to add something to the el.
+if($options['display-on']!='all'){
+	if($options['display-on'] == 'home'){
+		$el = 'body.home '.$el;
+	}else if($options['display-on'] == 'not-home'){
+		$el = 'body:not(.home) '.$el;
+	}
 }
 
 // Process the color, if thre is an opacity convert to RGBA, otherwise forget it. Because this can have an impact on performance it only will convert if the background is not normal
@@ -119,6 +130,11 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 	// output the header
 	header('Content-Type: text/css');
 
+	// Check if we have a CSS wrap and if we do do that
+	if($options['css-wrapper']!=''){
+		echo $options['css-wrapper'].'{';
+	}
+
 	// Open the styles for the element
 	echo $el.'{';
 
@@ -144,6 +160,10 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 
 		// And any additional styles they may have added
 		echo $options['additional-styles'];
+
+		if($options['css-wrapper']!=''){
+			echo ' }';
+		}
 
 	// close the css tag
 	echo '}';

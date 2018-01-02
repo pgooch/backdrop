@@ -3,7 +3,7 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.1.5
+Version: 2.2.5
 Author: Phillip Gooch
 Author URI: mailto:phillip@pgiauto.com
 License: GNU General Public License v2
@@ -261,6 +261,42 @@ class backdrop {
 			'type' 		=> 'move-direction'
 		)));
 
+		// Display On Page
+		$wp_customize->add_setting('backdrop[display-on]', array(
+			'default'           => 'all',
+			'sanitize_callback' => 'sanitize_fake',
+			'capability'        => 'edit_theme_options',
+			'type'           	=> 'option',
+		));
+		$wp_customize->add_control('display-on',array(
+			'label'     => __('Pages That Have Backdrop ','backdrop-plugin'),
+			'section'   => 'backdrop',
+			'settings'  => 'backdrop[display-on]',
+			'type'       => 'select',
+			'choices'    => array(
+				'home'		=> 'Homepage Only',
+				'all' 		=> 'All Pages',
+				'not-home'	=> 'All Pages Except Homepage',
+			),
+		));
+
+		// Selector Wrapper
+		if(get_option('backdrop-advanced','disabled')=='enabled'){
+			$wp_customize->add_setting('backdrop[css-wrapper]', array(
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_fake',
+				'capability'        => 'edit_theme_options',
+				'type'           	=> 'option',
+			));
+			$wp_customize->add_control(new backdrop_custom_css_wrapper_control($wp_customize,'css-wrapper',array(
+				'label'     => __('Media Query Wrapper','backdrop-plugin'),
+				'section'   => 'backdrop',
+				'settings'  => 'backdrop[css-wrapper]',
+				'type' 		=> 'css_wrapper'
+			)));
+
+		}
+
 		// Additional Styles
 		if(get_option('backdrop-advanced','disabled')=='enabled'){
 			$wp_customize->add_setting('backdrop[additional-styles]', array(
@@ -344,7 +380,7 @@ class backdrop {
 
 		// If were in advanced mode change the adv to the normal
 		if(get_option('backdrop-advanced','disabled')=='enabled'){
-			$options['element-include'] = $options['element-include-adv'];
+			$options['element-include'] = true;//$options['element-include-adv'];
 		}
 
 		// If were are going to show it show it.
@@ -437,6 +473,20 @@ function backdrop_add_custom_controllers($wp_customize){
 				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
 				<small>0 is stationary, 100 is 1:1 with scroll speed.</small>
 				<input type="number" <?php $this->link() ?> value="<?= $this->value() ?>" />
+			</label>
+		<?php }
+	}
+
+	/*
+		A CSS Wrapper controller, this is just a text with a note
+	*/
+	class backdrop_custom_css_wrapper_control extends WP_Customize_Control {
+		public $type = 'css_wrapper';
+		public function render_content(){ ?>
+			<label>
+				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
+				<small>Will wrap CSS rules, ads curly brackets.</small>
+				<input type="text" <?php $this->link() ?> value="<?= $this->value() ?>" />
 			</label>
 		<?php }
 	}

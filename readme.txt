@@ -2,8 +2,8 @@
 Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
-Tested up to: 4.9
-Stable tag: 2.1.5
+Tested up to: 4.9.1
+Stable tag: 2.2.5
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,9 @@ Probably, let me know and I'll see if I can work it in there.
 
 == Changelog ==
 
+#### 2.2.5
+ + Added an option to disable Backdrop on the homepage or to only enable it on the homepage, defaults to showing an all pages.
+ + Added an advanced option for a CSS wrapper allowing you to limit the styles with media queries.
 #### 2.1.5
  + Fixed a caching issue that could prevent the CSS and JS files from generating
 #### 2.1.4
