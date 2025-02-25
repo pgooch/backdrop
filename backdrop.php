@@ -3,9 +3,9 @@
 Plugin Name: Backdrop
 Plugin URI: http://fatfolderdesign.com/wordpress-plugins
 Description: Backdrop is an improved site background customizer allowing for all manner of fancy things.
-Version: 2.2.5
+Version: 2.3.5
 Author: Phillip Gooch
-Author URI: mailto:phillip@pgiauto.com
+Author URI: https://pgooch.com
 License: GNU General Public License v2
 */
 
@@ -13,11 +13,14 @@ class backdrop {
 
 	public function __construct(){
 		// Hook into the customizer action
-		add_action('customize_register',array(&$this,'customizer'	));
-		add_action('wp_enqueue_scripts',array(&$this,'enque'		));
-		add_action('wp_footer',			array(&$this,'element'		));
+		add_action('customize_register',array(&$this,'customizer'));
+		add_action('wp_enqueue_scripts',array(&$this,'enque'));
+		add_action('wp_footer',			array(&$this,'element'));
 		// Add the help page
-		add_action('admin_menu',		array(&$this,'help'			));
+		add_action('admin_menu',		array(&$this,'help'));
+		add_filter('plugin_action_links_'.plugin_basename(__FILE__), array(&$this,'plugin_page_help_link'));
+		// Filtering for the custom generator
+		add_action('parse_request',     array(&$this,'catch_generator_requests'));
 	}
 
 	/*
@@ -32,9 +35,9 @@ class backdrop {
 
 		// Everything for Backdrop will go into 1 section for convience.
 		$wp_customize->add_section('backdrop',array(
-			 'title'        => __( 'Backdrop','backdrop-plugin' ),
-			 'description'	=> 'For more details on the options below read the <a href="themes.php?page=backdrop-help" target="_blank">Backdrop Help</a> Page. <i>Note: Animations appear more sluggish in the preview than on the live site. Complex themes may be slow to refresh background.</i>'.(get_option('backdrop-advanced','disabled')=='enabled'?'<br/><br/>View the <a href="'.plugins_url().'/backdrop/generator.php?generate=css&time='.time().'" target="_blank">Generated CSS</a> or <a href="'.plugins_url().'/backdrop/generator.php?generate=js&time='.time().'" target="_blank">Generated JS</a> files, these do not unsaved changes currently being previewed, fi you would like to view those temporary stylesheets add <code>&use_session=true</code> to the URL.<br/><br/>':''),
-			 'priority'     => 1,
+			'title'        => __( 'Backdrop','backdrop' ),
+			'description'	=> 'For more details on the options below read the <a href="themes.php?page=backdrop-help" target="_blank">Backdrop Help</a> Page. <i>Note: Animations appear more sluggish in the preview than on the live site. Complex themes may be slow to refresh background.</i>'.(get_option('backdrop-advanced','disabled')=='enabled'?'<br/><br/>View the <a href="/backdrop.css?/backdrop.css?use_session=true" target="_blank">Generated CSS</a> or <a href="/backdrop.css?/backdrop.js?use_session=true" target="_blank">Generated JS</a> files as used in the preview with their corresponding settings.<br/><br/>':''),
+			'priority'     => 1,
 		) );
 
 		// ADV: Element that backdrop will be applied to
@@ -46,7 +49,7 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_fake',
 			));
 			$wp_customize->add_control('background_element', array(
-				'label'      => __('Applied To','backdrop-plugin'),
+				'label'      => __('Applied To','backdrop'),
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[element]',
 				'type'       => 'text',
@@ -62,7 +65,7 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_fake',
 			));
 			$wp_customize->add_control('background_element_include', array(
-				'label'      => __('Include the #backdrop-element','backdrop-plugin'),
+				'label'      => __('Include the #backdrop-element','backdrop'),
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[element-include-adv]',
 				'type'       => 'checkbox',
@@ -77,7 +80,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control( new WP_Customize_Color_Control($wp_customize,'color',array(
-			'label'    => __('Color','backdrop-plugin'),
+			'label'    => __('Color','backdrop'),
 			'section'  => 'backdrop',
 			'settings' => 'backdrop[color]',
 		)));
@@ -88,7 +91,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_percentage_control($wp_customize,'color-opacity',array(
-			'label'     => __('Color Opacity','backdrop-plugin'),
+			'label'     => __('Color Opacity','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[color-opacity]',
 			'type' 		=> 'percentage'
@@ -100,9 +103,9 @@ class backdrop {
 			'capability' 		=> 'edit_theme_options',
 			'type'       		=> 'option',
 			'sanitize_callback' => 'sanitize_file',
-		)); 
+		));
 		$wp_customize->add_control( new WP_Customize_Image_Control($wp_customize, 'image', array(
-			'label'    => __('Image','backdrop-plugin'),
+			'label'    => __('Image','backdrop'),
 			'section'  => 'backdrop',
 			'settings' => 'backdrop[image]',
 		)));
@@ -116,7 +119,7 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_fake',
 			));
 			$wp_customize->add_control('background_image-size', array(
-				'label'      => __('Image Size','backdrop-plugin'),
+				'label'      => __('Image Size','backdrop'),
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[image-size-adv]',
 				'type'       => 'text',
@@ -131,7 +134,7 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_fake',
 			));
 			$wp_customize->add_control('image-size', array(
-				'label'      => __('Image Size','backdrop-plugin'),
+				'label'      => __('Image Size','backdrop'),
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[image-size]',
 				'type'       => 'select',
@@ -155,12 +158,12 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_fake',
 			));
 			$wp_customize->add_control('background_image-position', array(
-				'label'      => __('Image Position','backdrop-plugin'),
+				'label'      => __('Image Position','backdrop'),
 				'section'    => 'backdrop',
 				'settings'   => 'backdrop[image-position-adv]',
 				'type'       => 'text',
 			));
-		
+
 		// Image Position (Both) (standard)
 		}else{
 			$wp_customize->add_setting('backdrop[image-position]', array(
@@ -170,7 +173,7 @@ class backdrop {
 				'type'           	=> 'option',
 			));
 			$wp_customize->add_control(new backdrop_custom_image_position_control($wp_customize,'image-position',array(
-				'label'     => __('Image Position','backdrop-plugin'),
+				'label'     => __('Image Position','backdrop'),
 				'section'   => 'backdrop',
 				'settings'  => 'backdrop[image-position]',
 				'type' 		=> 'image-position'
@@ -186,7 +189,7 @@ class backdrop {
 			'sanitize_callback' => 'sanitize_fake',
 		));
 		$wp_customize->add_control('image-repeat', array(
-			'label'      => __('Image Repeat','backdrop-plugin'),
+			'label'      => __('Image Repeat','backdrop'),
 			'section'    => 'backdrop',
 			'settings'   => 'backdrop[image-repeat]',
 			'type'       => 'select',
@@ -206,7 +209,7 @@ class backdrop {
 			'sanitize_callback' => 'sanitize_fake',
 		));
 		$wp_customize->add_control('background-effect', array(
-			'label'      => __('Background Effect','backdrop-plugin'),
+			'label'      => __('Background Effect','backdrop'),
 			'section'    => 'backdrop',
 			'settings'   => 'backdrop[background-effect]',
 			'type'       => 'select',
@@ -227,7 +230,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_speed_control($wp_customize,'parallax-speed',array(
-			'label'     => __('Parallax Speed','backdrop-plugin'),
+			'label'     => __('Parallax Speed','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[parallax-speed]',
 			'type' 		=> 'speed'
@@ -241,7 +244,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_speed_control($wp_customize,'move-speed',array(
-			'label'     => __('Slide Speed','backdrop-plugin'),
+			'label'     => __('Slide Speed','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[move-speed]',
 			'type' 		=> 'speed'
@@ -250,12 +253,12 @@ class backdrop {
 		// Slide Direction
 		$wp_customize->add_setting('backdrop[move-direction]', array(
 			'default'           => 'none right',
-			'sanitize_callback' => 'sanitize_percentage',
+			'sanitize_callback' => 'sanitize_fake',
 			'capability'        => 'edit_theme_options',
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_move_direction_control($wp_customize,'move-direction',array(
-			'label'     => __('Slide Direction','backdrop-plugin'),
+			'label'     => __('Slide Direction','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[move-direction]',
 			'type' 		=> 'move-direction'
@@ -269,7 +272,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control('display-on',array(
-			'label'     => __('Pages That Have Backdrop ','backdrop-plugin'),
+			'label'     => __('Pages That Have Backdrop ','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[display-on]',
 			'type'       => 'select',
@@ -289,7 +292,7 @@ class backdrop {
 				'type'           	=> 'option',
 			));
 			$wp_customize->add_control(new backdrop_custom_css_wrapper_control($wp_customize,'css-wrapper',array(
-				'label'     => __('Media Query Wrapper','backdrop-plugin'),
+				'label'     => __('Media Query Wrapper','backdrop'),
 				'section'   => 'backdrop',
 				'settings'  => 'backdrop[css-wrapper]',
 				'type' 		=> 'css_wrapper'
@@ -306,7 +309,7 @@ class backdrop {
 				'sanitize_callback' => 'sanitize_text',
 			));
 			$wp_customize->add_control('backdrop_additional_styles', array(
-				'label'     => __('Additional Styles','backdrop-plugin'),
+				'label'     => __('Additional Styles','backdrop'),
 				'section'   => 'backdrop',
 				'settings'  => 'backdrop[additional-styles]',
 				'type' 		=> 'textarea'
@@ -321,7 +324,7 @@ class backdrop {
 			'type'           	=> 'option',
 		));
 		$wp_customize->add_control(new backdrop_custom_last_update_control($wp_customize,'last_update',array(
-			'label'     => __('Last Update','backdrop-plugin'),
+			'label'     => __('Last Update','backdrop'),
 			'section'   => 'backdrop',
 			'settings'  => 'backdrop[last_update]',
 			'type' 		=> 'last_update',
@@ -340,7 +343,13 @@ class backdrop {
 		$use_session = '';
 
 		// Get the options (specifically for the last update time)
-		$options = get_option('backdrop',array('last_update'=>-1));
+		$options = get_option('backdrop');
+
+		// Check for the last update time and use it as a version number or all back
+		$ver = $options['last_update'];
+		if( is_null($ver) ){
+			$ver = time();
+		}
 
 		// Just in case someone has sessions disabled on a server level (it might solve a problem or two).
 		if(is_callable('session_start')){
@@ -355,7 +364,7 @@ class backdrop {
 
 				// Update the session and the $use_options string
 				$_SESSION['currently_customized_backdrop_options'] = get_option('backdrop');
-				$use_session = '&use_session=true';
+				$use_session = '?use_session=true&nonce='.wp_create_nonce('backdrop-live-session-preview');
 				$options['last_update'] = preg_replace('~[^0-9]+~','',microtime());
 
 			}
@@ -363,9 +372,8 @@ class backdrop {
 		}
 
 		// Enque the script and style
-		wp_enqueue_script('Backdrop Scripts',plugins_url().'/backdrop/generator.php?generate=js&time='.time().$use_session,array(),false,'all');
-		wp_enqueue_style('Backdrop Styles',plugins_url().'/backdrop/generator.php?generate=css&time='.time().$use_session,array(),false,'all');
-
+		wp_enqueue_script('Backdrop Scripts','/backdrop.js'.$use_session,array(),$ver,'all');
+		wp_enqueue_style('Backdrop Styles','/backdrop.css'.$use_session,array(),$ver,'all');
 	}
 
 	/*
@@ -387,7 +395,24 @@ class backdrop {
 		if(isset($options['element-include'])===false || $options['element-include']===true){
 			echo '<div id="backdrop-element"></div>';
 		}
-	
+
+	}
+
+	/*
+		This will watch and check the page requests and if it's the backdrop css or js file it'll deal with that instead 
+		of letting wordpress do it's thing.
+	*/
+	public function catch_generator_requests($query){
+		if( $query->request === 'backdrop.css' ){
+			$_GET['generate'] = 'css';
+			require 'generator.php';
+			exit;
+		}else if( $query->request === 'backdrop.js' ){
+			$_GET['generate'] = 'js';
+			require 'generator.php';
+			exit;
+		}
+		return $query;
 	}
 
 	/*
@@ -401,7 +426,10 @@ class backdrop {
 		// Loads the other page, it's much simpler this way.
 		require_once('help.php');
 	}
-
+	public function plugin_page_help_link($links){
+		$links[] = '<a href="./themes.php?page=backdrop-help">Help</a>';
+		return $links;
+	}
 }
 // The final peice(s) of the puzzle.
 $backdrop=new backdrop();
@@ -457,8 +485,8 @@ function backdrop_add_custom_controllers($wp_customize){
 		public $type = 'percentage';
 		public function render_content(){ ?>
 			<label>
-				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
-				<input type="number" min="0" max="100" <?php $this->link() ?> value="<?= $this->value() ?>" />
+				<span class="customize-control-title"><?php echo esc_html($this->label) ?></span>
+				<input type="number" min="0" max="100" <?php $this->link() ?> value="<?php echo esc_attr($this->value()) ?>" />
 			</label>
 		<?php }
 	}
@@ -470,9 +498,9 @@ function backdrop_add_custom_controllers($wp_customize){
 		public $type = 'speed';
 		public function render_content(){ ?>
 			<label>
-				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
+				<span class="customize-control-title"><?php echo esc_html($this->label) ?></span>
 				<small>0 is stationary, 100 is 1:1 with scroll speed.</small>
-				<input type="number" <?php $this->link() ?> value="<?= $this->value() ?>" />
+				<input type="number" <?php $this->link() ?> value="<?php echo esc_attr($this->value()) ?>" />
 			</label>
 		<?php }
 	}
@@ -484,9 +512,9 @@ function backdrop_add_custom_controllers($wp_customize){
 		public $type = 'css_wrapper';
 		public function render_content(){ ?>
 			<label>
-				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
+				<span class="customize-control-title"><?php echo esc_html($this->label) ?></span>
 				<small>Will wrap CSS rules, ads curly brackets.</small>
-				<input type="text" <?php $this->link() ?> value="<?= $this->value() ?>" />
+				<input type="text" <?php $this->link() ?> value="<?php echo esc_attr($this->value()) ?>" />
 			</label>
 		<?php }
 	}
@@ -498,7 +526,7 @@ function backdrop_add_custom_controllers($wp_customize){
 		public $type = 'image-position';
 		public function render_content(){ ?>
 			<label for="image-position-default">
-				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
+				<span class="customize-control-title"><?php echo esc_html($this->label) ?></span>
 				<input type="radio" name="image-position" <?php $this->link() ?> value="top left" /><input type="radio" name="image-position" <?php $this->link() ?> value="top center" /><input type="radio" name="image-position" <?php $this->link() ?> value="top right" /><br/>
 				<input type="radio" name="image-position" <?php $this->link() ?> value="center left" /><input type="radio" id="image-position-default" name="image-position" <?php $this->link() ?> value="center center" /><input type="radio" name="image-position" <?php $this->link() ?> value="center right" /><br/>
 				<input type="radio" name="image-position" <?php $this->link() ?> value="bottom left" /><input type="radio" name="image-position" <?php $this->link() ?> value="bottom center" /><input type="radio" name="image-position" <?php $this->link() ?> value="bottom right" />
@@ -513,7 +541,7 @@ function backdrop_add_custom_controllers($wp_customize){
 		public $type = 'move-direction';
 		public function render_content(){ ?>
 			<label for="image-position-default">
-				<span class="customize-control-title"><?= esc_html($this->label) ?></span>
+				<span class="customize-control-title"><?php echo esc_html($this->label) ?></span>
 				<input type="radio" name="move-direction" <?php $this->link() ?> value="up left" /><input type="radio" name="move-direction" <?php $this->link() ?> value="up none" /><input type="radio" name="move-direction" <?php $this->link() ?> value="up right" /><br/>
 				<input type="radio" name="move-direction" <?php $this->link() ?> value="none left" /><input type="radio" name="move-direction" <?php $this->link() ?> value="none none" disabled style="opacity:0;"/><input type="radio" name="move-direction" id="move-direction-default" <?php $this->link() ?> value="none right" /><br/>
 				<input type="radio" name="move-direction" <?php $this->link() ?> value="down left" /><input type="radio" name="move-direction" <?php $this->link() ?> value="down none" /><input type="radio" name="move-direction" <?php $this->link() ?> value="down right" />
@@ -529,7 +557,7 @@ function backdrop_add_custom_controllers($wp_customize){
 	class backdrop_custom_last_update_control extends WP_Customize_Control {
 		public $type = 'last_update';
 		public function render_content(){ ?>
-			<input type="text" id="last_update" <?php $this->link() ?> value="<?= $this->value() ?>" style="display:none;"/>
+			<input type="text" id="last_update" <?php $this->link() ?> value="<?php echo esc_attr($this->value()) ?>" style="display:none;"/>
 			<script>
 				jQuery('html').on('mousedown','input[type="submit"][name="save"]',function(){
 					jQuery('input#last_update').val(new Date().getTime()).trigger('keyup');

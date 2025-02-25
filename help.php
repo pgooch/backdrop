@@ -4,19 +4,23 @@
 /*
 	Toggles the "Advanced Settings" option
 */
-if(isset($_POST['enable_advanced'])){
-	update_option('backdrop-advanced','enabled');
-	echo '<div id="message" class="updated"><p><strong>Advanced Settings have been Enabled.</strong></p></div>';
-}else if(isset($_POST['disable_advanced'])){
-	update_option('backdrop-advanced','disabled');
-	echo '<div id="message" class="updated"><p><strong>Advanced Settings have been Disabled.</strong></p></div>';
+if( check_admin_referer( 'backdrop-help-page-setting ') ){
+	if(isset($_POST['enable_advanced'])){
+		update_option('backdrop-advanced','enabled');
+		echo '<div id="message" class="updated"><p><strong>Advanced Settings have been Enabled.</strong></p></div>';
+	}else if(isset($_POST['disable_advanced'])){
+		update_option('backdrop-advanced','disabled');
+		echo '<div id="message" class="updated"><p><strong>Advanced Settings have been Disabled.</strong></p></div>';
+	}
 }
 /*
 	Clears the settings
 */
-if(isset($_POST['clear_settings'])){
-	delete_option('backdrop');
-	echo '<div id="message" class="updated"><p><strong>Backdrop Settings Cleared.</strong></p></div>';
+if( check_admin_referer( 'backdrop-help-page-setting ') ){
+	if(isset($_POST['clear_settings'])){
+		delete_option('backdrop');
+		echo '<div id="message" class="updated"><p><strong>Backdrop Settings Cleared.</strong></p></div>';
+	}
 }
 ?>
 
@@ -268,6 +272,7 @@ if(isset($_POST['clear_settings'])){
 	disable advanced settings at any time with the button below.
 </p>
 <form method="post" action="">
+	<?php wp_nonce_field( 'backdrop-help-page-setting' ); ?>
 	<p class="submit">
 		<?php if(get_option('backdrop-advanced','disabled')=='disabled'){
 			echo '<input type="submit" name="enable_advanced" class="button button-secondary" value="Enable Advanced Settings" />';
@@ -304,7 +309,7 @@ if(isset($_POST['clear_settings'])){
 					</p>
 				</td>
 			</tr>
-		
+
 			<tr valign="top">
 				<th scope="row">Include the #backdrop-element</th>
 				<td>
@@ -472,7 +477,7 @@ if(isset($_POST['clear_settings'])){
 					</p>
 				</td>
 			</tr>
-		
+
 		</tbody>
 	</table>
 
@@ -485,6 +490,7 @@ if(isset($_POST['clear_settings'])){
 	</p>
 
 	<form method="post" action="" id="clear-form">
+		<?php wp_nonce_field( 'backdrop-help-page-setting' ); ?>
 		<p class="submit">
 			<input type="submit" name="clear_settings" class="button button-secondary" value="Clear Backdrop Settings" />
 		</p>
@@ -509,13 +515,8 @@ if(isset($_POST['clear_settings'])){
 	<tr valign="top">
 		<th scope="row">Donate</th>
 		<td>
-			Like the plug-in and want to support further development? Thanks, thats just awesome! You can use the paypal button below to donate any amount you want. Don't like PayPal? send me an email, we can figure something out.<br/>
-			<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-				<input type="hidden" name="cmd" value="_s-xclick">
-				<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
-				<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
-				<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
-			</form>
+			Like the plug-in and want to support further development? Thanks, thats just awesome! 
+			Consider <a href="https://buymeacoffee.com/pgooch" target="_blank">buying me a coffee</a> to support further open source development or if you're looking to get some work done yourself <a href="mailto:phillip.gooch@gmail.com" target="_blank">get in touch</a> and we'll talk code.
 		</td>
 	</tr>
 </table>

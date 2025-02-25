@@ -4,12 +4,11 @@
 	load the options and merge that with the defaults (better to be safe, I know the default should be passed but I've 
 	noticed that it doesn't always do it with my themes).
 */
-require('../../../wp-config.php');
 
 // Get and merge the options with the defaults and any currently customized ones that might be in the session
-if(isset($_GET['use_session'])){
+if(isset($_GET['use_session']) && isset($_GET['nonce']) && wp_verify_nonce(wp_kses(wp_unslash($_GET['nonce']),[]), 'backdrop-live-session-preview')){
 	session_start();
-	$session = (isset($_SESSION['currently_customized_backdrop_options'])?$_SESSION['currently_customized_backdrop_options']:array());
+	$session = (isset($_SESSION['currently_customized_backdrop_options'])?array_map('sanitize_text_field',$_SESSION['currently_customized_backdrop_options']):array());
 	$session['session_id'] = session_id();
 }else{
 	$session = array();
@@ -126,29 +125,29 @@ if($options['image']!=''){
 	If get set to css, generate css
 */
 if(isset($_GET['generate']) && $_GET['generate']=='css'){
-	
+
 	// output the header
 	header('Content-Type: text/css');
 
 	// Check if we have a CSS wrap and if we do do that
 	if($options['css-wrapper']!=''){
-		echo $options['css-wrapper'].'{';
+		echo esc_html($options['css-wrapper']).'{';
 	}
 
 	// Open the styles for the element
-	echo $el.'{';
+	echo esc_html($el).'{';
 
 		// The background color, which has already been processed
-		echo 'background-color:'.$options['color'].';';
+		echo 'background-color:'.esc_html($options['color']).';';
 
 		// Skip all the image released ones if the image is none
 		if($options['image']!=''){
 
 			// All the image related styles, should be pretty much 1:1 with options
-			echo 'background-image:'.$options['image'].'!important;';
-			echo 'background-size:'.$options['image-size'].'!important;';
-			echo 'background-repeat:'.$options['image-repeat'].'!important;';
-			echo 'background-position:'.$options['image-position'].';';
+			echo 'background-image:'.wp_kses($options['image'],[]).'!important;';
+			echo 'background-size:'.esc_html($options['image-size']).'!important;';
+			echo 'background-repeat:'.esc_html($options['image-repeat']).'!important;';
+			echo 'background-position:'.esc_html($options['image-position']).';';
 
 			// Background attachment is always false, we fake all scrolling
 			echo 'background-attachment:fixed!important;';
@@ -159,7 +158,7 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 		}
 
 		// And any additional styles they may have added
-		echo $options['additional-styles'];
+		echo esc_html($options['additional-styles']);
 
 		if($options['css-wrapper']!=''){
 			echo ' }';
@@ -176,7 +175,7 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 	If get set to js, generate js
 */
 }else if(isset($_GET['generate']) && $_GET['generate']=='js'){
-	
+
 	// output the header
 	header('Content-Type: text/javascript');
 
@@ -202,17 +201,17 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 		echo 'requestAnimationFrame(_backdropSlide);';
 
 		// Get the image size
-		echo 'var imgW='.$image_size[0].';';
-		echo 'var imgH='.$image_size[1].';';
+		echo 'var imgW='.esc_js($image_size[0]).';';
+		echo 'var imgH='.esc_js($image_size[1]).';';
 
 		// Get the scroll position
 		echo 'var s=(document.documentElement.scrollTop)?document.documentElement.scrollTop:window.pageYOffset;';
-		
+
 		// Get move speed (as parallax regardless of wether or not your using parallax) 
-		echo 'var p='.$options['move-speed'].';';
-		
+		echo 'var p='.esc_js($options['move-speed']).';';
+
 		// Now we loop through the elements
-		echo 'var elements=document.querySelectorAll("'.$el.'");';
+		echo 'var elements=document.querySelectorAll("'.esc_js($el).'");';
 		echo 'for(var element in elements){';
 
 			// Make an array to sore the position in, and grab the specific element we want
@@ -263,8 +262,8 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 						// Loop through both looking for the non-auto one, getting how big we need to adjust the other
 						foreach($img_size as $n => $size){
 							if($size!='auto'){
-								echo 'var fullAdj='.preg_replace('~[^0-9]+~','',$img_size[$n]).'/img'.($n==0?'W':'H').';';
-								echo 'img'.($n==0?'W':'H').'='.preg_replace('~[^0-9]+~','',$img_size[$n]).';';
+								echo esc_js('var fullAdj='.preg_replace('~[^0-9]+~','',$img_size[$n]).'/img'.($n==0?'W':'H').';');
+								echo esc_js('img'.($n==0?'W':'H').'='.preg_replace('~[^0-9]+~','',$img_size[$n]).';');
 							}
 						}
 
@@ -278,14 +277,15 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 
 					// No math, no effort
 					}else{
-						echo 'imgW='.preg_replace('~[^0-9]+~','',$img_size[0]).';';
-						echo 'imgH='.preg_replace('~[^0-9]+~','',$img_size[1]).';';
+						echo esc_js('imgW='.preg_replace('~[^0-9]+~','',$img_size[0]).';');
+						echo esc_js('imgH='.preg_replace('~[^0-9]+~','',$img_size[1]).';');
 					}
 
 				}
 
 				// First we get the inital image position using the $image_size and maths
 				$xy=explode(' ',$options['image-position']);
+
 				foreach($xy as $n => $pos){
 					switch(preg_replace('~[^a-z%]+~','',strtolower($pos))){
 						case 'left':
@@ -304,10 +304,10 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 							echo 'var imgPosY=el.offsetHeight-imgH;';
 						break;
 						case 'px':
-							echo 'var imgPos'.($n==1?'X':'Y').'='.preg_replace('~[^0-9-]+~','',$pos).';';
+							echo esc_js('var imgPos'.($n==1?'X':'Y').'='.preg_replace('~[^0-9-]+~','',$pos).';');
 						break;
 						case '%':
-							echo 'var imgPos'.($n==1?'X':'Y').'=(el.offset'.($n==1?'Width':'Height').'*'.(preg_replace('~[^0-9-]+~','',$pos)/100).')-(img'.($n==1?'W':'H').'/2);';
+							echo esc_js('var imgPos'.($n==1?'X':'Y').'=(el.offset'.($n==1?'Width':'Height').'*'.(preg_replace('~[^0-9-]+~','',$pos)/100).')-(img'.($n==1?'W':'H').'/2);');
 						break;
 
 					}
@@ -349,7 +349,7 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 
 				// and update the style
 				echo 'el.style.backgroundPosition = pos.join(" ");';
-			
+
 			echo '};';
 
 		echo '};';
@@ -370,6 +370,8 @@ if(isset($_GET['generate']) && $_GET['generate']=='css'){
 if($_in_advanced){
 	echo '/*';
 	echo "\n".'Backdrop Settings ';
-	print_r($options);
-	echo '*/'."\n";
+	foreach($options as $k => $v){
+		echo "\n ".esc_html($k).': '.wp_kses($v,[]);
+	}
+	echo "\n".'*/';
 }

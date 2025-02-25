@@ -2,8 +2,8 @@
 Contributors: Phillip.Gooch
 Tags: background, customization, themes
 Requires at least: 4.0
-Tested up to: 4.9.1
-Stable tag: 2.2.5
+Tested up to: 6.7
+Stable tag: 2.3.5
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ Backdrop is a site background customizer with power greater than the mere stock 
 + Advanced options for those in the know with CSS.
 + Built for the smoothest animations possible.
 
-_Note: Starting with version 2.0 Backdrop will no longer work it's magic with older versions of Internet Explorer (before version 10). IF you want to support animations on older versions of IE then please use Backdrop 1.X._
+_Note: Starting with version 2.0 Backdrop will no longer work it's magic with older versions of Internet Explorer (before version 10). If you want to support animations on older versions of IE then please use Backdrop 1.X._
 
 __Note: Your Backdrop settings will not be transfered from 1.X to 2.X, you will need to re-set your backdrop on update.__
 
@@ -36,7 +36,7 @@ __Note: Your Backdrop settings will not be transfered from 1.X to 2.X, you will 
 
 == Frequently Asked Questions ==
 
-= I got this great idea, can you implement it? = 
+= I got this great idea, can you implement it? =
 
 Probably, let me know and I'll see if I can work it in there.
 
@@ -46,6 +46,13 @@ Probably, let me know and I'll see if I can work it in there.
 
 == Changelog ==
 
+#### 2.3.5
+ + Updated code for modern WordPress standards.
+ + Changed the way the generator works in order to better support unusual server setups.
+ + Fixed typos and changed verbiage for clarity.
+ + Added plugin page link to the help page.
+ + Fixed a bug causing some sliding directions to fail to slide at all.
+ + Updated donation link.
 #### 2.2.5
  + Added an option to disable Backdrop on the homepage or to only enable it on the homepage, defaults to showing an all pages.
  + Added an advanced option for a CSS wrapper allowing you to limit the styles with media queries.
